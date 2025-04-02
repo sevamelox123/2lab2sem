@@ -1,18 +1,11 @@
 #include "netimpl.hpp"
+using namespace std;
 
-Server::Server()
+Server::Server() : Server(PORT)
 {
 }
 
 Server::Server(unsigned int socket_port)
-{
-}
-
-Server::~Server()
-{
-}
-
-void Server::loop()
 {
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -38,69 +31,93 @@ void Server::loop()
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
-    if (listen(sockfd, 3) < 0)
+}
+
+Server::~Server()
+{
+    close(sockfd);
+}
+
+void Server::loop()
+{
+    if (listen(sockfd, 10) < 0)
     {
         perror("listen");
         exit(EXIT_FAILURE);
     }
-    if ((new_socket = accept(sockfd, (struct sockaddr *)&address,
-                             &addrlen)) < 0)
+    while ("te" != "to")
     {
-        perror("accept");
-        exit(EXIT_FAILURE);
+        if ((new_socket = accept(sockfd, (struct sockaddr *)&address,
+                                 &addrlen)) < 0)
+        {
+            perror("accept");
+            exit(EXIT_FAILURE);
+        }
+
+        valread = read(new_socket, buffer,
+                       1024 - 1);
+        printf("%s\n", buffer);
+        if (std::string(buffer) == "GET DT")
+        {
+            char *msg = "pivo";
+
+            DayTime Dt(5);
+
+            send(new_socket, &Dt, sizeof(DayTime), 0);
+            // send(new_socket, msg, strlen(msg), 0);
+            cout << "teto work"<<endl;
+        }
+        else
+        {
+            send(new_socket, hello, strlen(hello), 0);
+        }
+        printf("Hello message sent\n");
+
+        // closing the connected socket
+        close(new_socket);
     }
-
-    // subtract 1 for the null
-    // terminator at the end
-    valread = read(new_socket, buffer,
-                   1024 - 1);
-    printf("%s\n", buffer);
-    send(new_socket, hello, strlen(hello), 0);
-    printf("Hello message sent\n");
-
-    // closing the connected socket
-    close(new_socket);
-
-    // closing the listening socket
-    close(sockfd);
 }
 
-void Client::loop()
+Client::Client()
 {
-    if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
         printf("\n Socket creation error \n");
         exit(EXIT_FAILURE);
     }
+}
 
+Client::~Client()
+{
+    close(client_fd);
+}
+
+DayTime Client::requestDT()
+{
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
 
-    // Convert IPv4 and IPv6 addresses from text to binary
-    // form
-    if (inet_pton(AF_INET, "172.19.58.82", &serv_addr.sin_addr)
-        <= 0) {
+    if (inet_pton(AF_INET, "172.19.58.82", &serv_addr.sin_addr) <= 0)
+    {
         printf(
             "\nInvalid address/ Address not supported \n");
         exit(EXIT_FAILURE);
     }
 
-    if ((status
-         = connect(client_fd, (struct sockaddr*)&serv_addr,
-                   sizeof(serv_addr)))
-        < 0) {
+    if ((status = connect(client_fd, (struct sockaddr *)&serv_addr,
+                          sizeof(serv_addr))) < 0)
+    {
         printf("\nConnection Failed \n");
         exit(EXIT_FAILURE);
     }
-  
-    // subtract 1 for the null
-    // terminator at the end
-    send(client_fd, hello, strlen(hello), 0);
-    printf("Hello message sent\n");
-    valread = read(client_fd, buffer,
-                   1024 - 1); 
-    printf("%s\n", buffer);
 
-    // closing the connected socket
-    close(client_fd);
+    char *teto = "GET DT";
+    send(client_fd, teto, strlen(teto), 0);
+    valread = read(client_fd, buffer, 1024 - 1);
+    // printf("%s\n", buffer);
+    DayTime dt;
+    memcpy(static_cast<void*>(&dt), buffer, sizeof(DayTime));
+    std::cout << dt.getHour() << " " << dt.getMinute() << " " << dt.getSec() << std::endl;
 
+    return DayTime();
 }

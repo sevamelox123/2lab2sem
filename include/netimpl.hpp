@@ -1,4 +1,7 @@
+#pragma once
 #include <iostream>
+
+#include <daytime.hpp>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -10,6 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctime>
+
+
 
 #define PORT 50104
 
@@ -42,5 +48,7 @@ private:
     
 
 public:
-    void loop();
+    Client();
+    ~Client();
+    DayTime requestDT();
 };

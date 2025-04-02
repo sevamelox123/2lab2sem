@@ -62,3 +62,23 @@ bool DayTime::checker(unsigned int sec, unsigned int minute, unsigned int hour, 
         return true;
     }
 }
+DayTime& DayTime::operator=(const DayTime& dt)
+{
+    sec = dt.sec;
+    minute = dt.minute;
+    hour = dt.hour;
+    day = dt.day;
+    month = dt.month;
+    year = dt.year;
+    return *this;
+}
+DayTime& DayTime::operator=(DayTime&& src)
+{
+    sec = src.sec;
+    minute = src.minute;
+    hour = src.hour;
+    day = src.day;
+    month = src.month;
+    year = src.year;
+    return *this;
+}

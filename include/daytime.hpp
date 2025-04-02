@@ -51,6 +51,8 @@ public:
 
     inline void setYear(int _year);
     inline int getYear() const;
+    DayTime& operator=(const DayTime& dt);
+    DayTime& operator=(DayTime&& src);
 
     bool checker(unsigned int sec, unsigned int minute, unsigned int hour, unsigned int day, unsigned int month, unsigned int year);
 };

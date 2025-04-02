@@ -1,6 +1,7 @@
 #include <iostream>
 #include <daytime.hpp>
 #include <netimpl.hpp>
+#include <ctime>
 using namespace std;
 
 int main()
@@ -18,7 +19,7 @@ int main()
     else if (choice == 2)
     {
         Client clie;
-        clie.loop();
+        clie.requestDT();
     }
 
     return 0;
