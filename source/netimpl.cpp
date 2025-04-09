@@ -59,13 +59,24 @@ void Server::loop()
         printf("%s\n", buffer);
         if (std::string(buffer) == "GET DT")
         {
-            char *msg = "pivo";
+            // char *msg = "pivo";
 
-            DayTime Dt(5);
+            std::time_t now = std::time(nullptr);
+
+            std::tm *localTime = std::localtime(&now);
+
+            DayTime Dt;
+            Dt.setSec(localTime->tm_sec);
+            Dt.setMinute(localTime->tm_min);
+            Dt.setHour(localTime->tm_hour);
+            Dt.setDay(localTime->tm_mday);
+            Dt.setMounth(localTime->tm_mon+1);
+            Dt.setYear(localTime->tm_year+1900);
+            // Dt.printDayTime();
 
             send(new_socket, &Dt, sizeof(DayTime), 0);
             // send(new_socket, msg, strlen(msg), 0);
-            cout << "teto work"<<endl;
+            cout << "teto work" << endl;
         }
         else
         {
@@ -114,10 +125,8 @@ DayTime Client::requestDT()
     char *teto = "GET DT";
     send(client_fd, teto, strlen(teto), 0);
     valread = read(client_fd, buffer, 1024 - 1);
-    // printf("%s\n", buffer);
     DayTime dt;
-    memcpy(static_cast<void*>(&dt), buffer, sizeof(DayTime));
-    std::cout << dt.getHour() << " " << dt.getMinute() << " " << dt.getSec() << std::endl;
-
+    memcpy(static_cast<void *>(&dt), buffer, sizeof(DayTime));
+    dt.printDayTime();
     return DayTime();
 }

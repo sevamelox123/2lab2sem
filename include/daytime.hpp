@@ -1,10 +1,10 @@
 #pragma once
 #include <iostream>
 
-struct MonthDays {
-    int mounth;
-    int days;
-};
+// struct MonthDays {
+//     int mounth;
+//     int days;
+// };
 
 struct TimeStruct {
     unsigned int sec;
@@ -55,6 +55,11 @@ public:
     DayTime& operator=(DayTime&& src);
 
     bool checker(unsigned int sec, unsigned int minute, unsigned int hour, unsigned int day, unsigned int month, unsigned int year);
+    void printDayTime();
+    int DaysTo(int day, int month, int year, int cDay, int cMonth, int cYear);
+    long SecsTo(int y, int m, int d, int cy, int cm, int cd);
+    DateStruct date();
+    TimeStruct time();
 };
 
 inline int DayTime::getSec() const
@@ -101,11 +106,17 @@ inline int DayTime::getHour() const
 
 inline void DayTime::setDay(unsigned int _day)
 {
-    //wip
-    // if(_day >= 30)
-    // {
-    //     throw std::runtime_error("you stupid fatfuck with sec");
-    // }
+
+    const int monthIds[] = {
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+    const int monthDays[] = {
+        31, 28, 31, 30, 31, 30,
+        31, 31, 30, 31, 30, 31};
+    if (_day > monthDays[month - 1])
+    {
+        throw std::runtime_error("you stupid fatfuck with days");
+    }
     day = _day;
 }
 
