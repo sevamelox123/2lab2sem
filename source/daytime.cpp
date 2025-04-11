@@ -6,16 +6,16 @@ DayTime::DayTime(DayTime& dt) : DayTime::DayTime(dt.sec, dt.minute, dt.hour, dt.
 DayTime::DayTime(int _seconds, int _minutes, int _hours, int _days, int _month, int _years) : sec{_seconds},\
  minute{_minutes}, hour{_hours}, day{_days}, month{_month}, year{_years} {
 
-    if (checker(sec, minute, hour, day, month, year))
+    if (!checker(sec, minute, hour, day, month, year))
     {
-        throw std::runtime_error("error with contructor int");
+        throw std::runtime_error("error with contructor");
     }
 }
 DayTime::DayTime(TimeStruct ts, DateStruct ds) : sec(ts.sec), minute(ts.minute), hour(ts.hour), day(ds.day), month(ds.month), year(ds.year)
 {
-    if (checker(sec, minute, hour, day, month, year))
+    if (!checker(sec, minute, hour, day, month, year))
     {
-        throw std::runtime_error("error with contructor ts , ds");
+        throw std::runtime_error("error with contructor");
     }
 }
 DayTime::DayTime(DayTime &&moved) : DayTime::DayTime(moved.sec, moved.minute, moved.hour, moved.day, moved.month, moved.year){
@@ -46,7 +46,7 @@ bool DayTime::checker(unsigned int sec, unsigned int minute, unsigned int hour, 
         throw std::runtime_error("Checker error - hours");
         return false;
     }
-    else if (day > getDayCount(month-1))
+    else if (day > static_cast<unsigned int>(getDayCount(month-1)))
     {
         throw std::runtime_error("Checker error - days");
         return false;
@@ -125,11 +125,11 @@ DayTime DayTime::fromString(const std::string& input, const std::string& format)
     int minute = components[5];
     int second = components[6];
 
-    if (month < 1 || month > 12) throw std::runtime_error("Invalid month");
-    if (day < 1 || day > 31) throw std::runtime_error("Invalid day");
-    if (hour < 0 || hour > 23) throw std::runtime_error("Invalid hour");
-    if (minute < 0 || minute > 59) throw std::runtime_error("Invalid minute");
-    if (second < 0 || second > 59) throw std::runtime_error("Invalid second");
+    if (month > 12) throw std::runtime_error("Invalid month");
+    if (day > 31) throw std::runtime_error("Invalid day");
+    if (hour > 23) throw std::runtime_error("Invalid hour");
+    if (minute > 59) throw std::runtime_error("Invalid minute");
+    if (second > 59) throw std::runtime_error("Invalid second");
 
 
     int maxDays = getDayCount(month);
@@ -218,59 +218,59 @@ TimeStruct DayTime::time()
 void DayTime::addSec(const int _sec)
 {
     sec += _sec;
-    if (sec < 0) {
-        this->addMinute(abs(sec) / -60 - ((abs(sec) < 60) ? 1 : 0));
-        sec = ((60 * (abs(sec) / 60 + 1)) + sec) % 60;
-    }
-    else {
+    // if (sec < 0) {
+    //     this->addMinute(abs(sec) / -60 - ((abs(sec) < 60) ? 1 : 0));
+    //     sec = ((60 * (abs(sec) / 60 + 1)) + sec) % 60;
+    // }
+    // else {
         this->addMinute(sec / 60);
         sec = sec % 60;
-    }
+    // }
 }
 
 void DayTime::addMinute(const int _minute)
 {
     minute += _minute;
-    if (minute < 0) {
-        this->addHour(abs(minute) / -60 - ((abs(minute) < 60) ? 1 : 0));
-        minute = ((60 * (abs(minute) / 60 + 1)) + minute) % 60;
-    }
-    else {
+    // if (minute < 0) {
+    //     this->addHour(abs(minute) / -60 - ((abs(minute) < 60) ? 1 : 0));
+    //     minute = ((60 * (abs(minute) / 60 + 1)) + minute) % 60;
+    // }
+    // else {
         this->addHour(minute / 60);
         minute = minute % 60;
-    }
+    // }
 }
 
 void DayTime::addHour(const int _hour)
 {
     hour += _hour;
-    if (hour < 0) {
-        this->addDay(abs(hour) / -24 - ((abs(hour) < 24) ? 1 : 0));
-        hour = ((24 * (abs(hour) / 24 + 1)) + hour) % 24;
-    }
-    else {
+    // if (hour < 0) {
+    //     this->addDay(abs(hour) / -24 - ((abs(hour) < 24) ? 1 : 0));
+    //     hour = ((24 * (abs(hour) / 24 + 1)) + hour) % 24;
+    // }
+    // else {
         this->addDay(hour / 24);
         hour = hour % 24;
-    }
+    // }
 }
 
 void DayTime::addDay(const int _day)
 {
     day--;
     day += _day;
-    if (_day < 0) {
-        while (day < 0) {
-            this->addMonth(-1);
-            day += getDayCount(month);
-        }
+    // if (_day < 0) {
+    //     while (day < 0) {
+    //         this->addMonth(-1);
+    //         day += getDayCount(month);
+    //     }
         
-    }
-    else {
+    // }
+    // else {
         while (day > getDayCount(month) - 1) {
             day -= getDayCount(month);
             this->addMonth(1);
         }
-    }
+    // }
     day++;
 }
 
@@ -279,27 +279,27 @@ void DayTime::addMonth(const int _month)
 
     month--;
     month += _month;
-    if (_month < 0) {
-        if (month < 0) {
-            if (abs(month) < 12) {
-                year -= 1;
-                month = 12 + month;
-            }
-            else {
-                year -= abs(month) / 12;
-                month = (12 * (abs(month) / 12)) + month;
-            }
+    // if (_month < 0) {
+    //     if (month < 0) {
+    //         if (abs(month) < 12) {
+    //             year -= 1;
+    //             month = 12 + month;
+    //         }
+    //         else {
+                // year -= abs(month) / 12;
+                // month = (12 * (abs(month) / 12)) + month;
+        //     }
 
-        }
-    }
-    else {
+        // }
+    // }
+    // else {
         year += month / 12;
         month = month % 12;
-    }
+    // }
     if (day + 1 > getDayCount(month + 1)) {
-        if (month < 0) {
-            day = getDayCount(month + 1);
-        }
+        // if (month < 0) {
+        //     day = getDayCount(month + 1);
+        // }
     }
     month++;
 }

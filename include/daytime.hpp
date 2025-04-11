@@ -129,7 +129,7 @@ inline void DayTime::setDay(unsigned int _day)
     // const int monthDays[] = {
     //     31, 28, 31, 30, 31, 30,
     //     31, 31, 30, 31, 30, 31};
-    if (_day > getDayCount(month-1))
+    if (_day > static_cast<unsigned int>(getDayCount(month-1)))
     {
         throw std::runtime_error("you stupid fatfuck with days");
     }
