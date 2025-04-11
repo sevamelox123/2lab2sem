@@ -61,17 +61,21 @@ void Server::loop()
         {
             // char *msg = "pivo";
 
-            std::time_t now = std::time(nullptr);
+            // std::time_t now = std::time(nullptr);
 
-            std::tm *localTime = std::localtime(&now);
+            // std::tm *localTime = std::localtime(&now);
 
-            DayTime Dt;
-            Dt.setSec(localTime->tm_sec);
-            Dt.setMinute(localTime->tm_min);
-            Dt.setHour(localTime->tm_hour);
-            Dt.setDay(localTime->tm_mday);
-            Dt.setMounth(localTime->tm_mon+1);
-            Dt.setYear(localTime->tm_year+1900);
+            std::time_t nowTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+            std::tm time{};
+            localtime_r(&nowTime, &time);
+            // cout << localTime->tm_sec<< " : " << localTime->tm_min<< " : " << localTime->tm_hour<< " : " << localTime->tm_mday<< " : " << localTime->tm_mon+1<< " : " << localTime->tm_year+1900 << endl;
+            DayTime Dt(time.tm_sec, time.tm_min, time.tm_hour, time.tm_mday, time.tm_mon + 1, time.tm_year + 1900); // time.tm_sec, time.tm_min, time.tm_hour, time.tm_mday, time.tm_mon + 1, time.tm_year + 1900
+            // Dt.setSec(localTime->tm_sec);
+            // Dt.setMinute(localTime->tm_min);
+            // Dt.setHour(localTime->tm_hour);
+            // Dt.setDay(localTime->tm_mday);
+            // Dt.setMounth(localTime->tm_mon+1);
+            // Dt.setYear(localTime->tm_year+1900);
             // Dt.printDayTime();
 
             send(new_socket, &Dt, sizeof(DayTime), 0);
@@ -82,7 +86,7 @@ void Server::loop()
         {
             send(new_socket, hello, strlen(hello), 0);
         }
-        printf("Hello message sent\n");
+        // printf("Hello message sent\n");
 
         // closing the connected socket
         close(new_socket);
