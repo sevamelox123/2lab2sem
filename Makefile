@@ -22,6 +22,12 @@ debug: ./tetosocket.cpp $(INCLUDES) $(BINARIES_DEBUG)
 tetosocket: ./tetosocket.cpp $(INCLUDES) $(BINARIES)
 	$(CC) $(CFLAGS) $< -o $@ $(LINKDIR) $(LDFLAGS)
 
+tests_datetime: ./test.cpp $(INCLUDES) $(BINARIES)
+	$(CC) $(CFLAGS) $< -o $@ $(LINKDIR) $(LDFLAGS) -lgtest -lgmock -pthread
+
+tests_datetime_dbg: ./test.cpp $(INCLUDES) $(BINARIES_DEBUG)
+	$(CC) $(CFLAGS) -g $< -o $@ $(LINKDIR) $(LDFLAGS_DEBUG) -lgtest -lgmock -pthread
+
 $(BIN_FOLDER):
 	mkdir $(BIN_FOLDER)
 
@@ -57,6 +63,12 @@ $(BIN_FOLDER)/libnetimpldbg.a: ./source/netimpl.cpp ./include/netimpl.hpp
 
 run: tetosocket
 	./tetosocket
+
+test: tests_datetime
+	./tests_datetime
+
+test_dbg: tests_datetime_dbg
+	./tests_datetime_dbg
 
 qcPerf:
 	clang-tidy -checks="-*,boost-*,clang-analyzer-*,modernize-*,performance-*,cppcoreguidelines-*,-cppcoreguidelines-avoid-magic-numbers" tetosocket.cpp ./source/* ./include/* -- -I./include/ -std=c++20

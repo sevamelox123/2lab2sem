@@ -14,11 +14,17 @@ struct TimeStruct {
     unsigned int sec;
     unsigned int minute;
     unsigned int hour;
+    inline auto toString() const -> std::string {
+        return std::string(std::to_string(hour) + ":" + std::to_string(minute) + ":" + std::to_string(sec));
+    }
 };
 struct DateStruct {
     unsigned int day;
     unsigned int month;
     unsigned int year;
+    inline auto toString() const -> std::string {
+        return std::string(std::to_string(day) + "/" + std::to_string(month) + "/" + std::to_string(year));
+    }
 };
 
 class DayTime
@@ -50,8 +56,8 @@ public:
     inline void setDay(unsigned int _day);
     inline int getDay() const;
 
-    inline void setMounth(unsigned int _mounth);
-    inline int getMounth() const;
+    inline void setMonth(unsigned int _mounth);
+    inline int getMonth() const;
 
     inline void setYear(int _year);
     inline int getYear() const;
@@ -64,6 +70,7 @@ public:
     int DaysTo(int day, int month, int year, int cDay, int cMonth, int cYear);
     long SecsTo(int y, int m, int d, int cy, int cm, int cd);
     static int getDayCount(int month);
+    long long getTimeStamp();
 
     DateStruct date();
     TimeStruct time();
@@ -86,7 +93,7 @@ inline void DayTime::setSec(unsigned int _sec)
 {
     if(_sec >= 60)
     {
-        throw std::runtime_error("you stupid fatfuck with sec");
+        throw std::runtime_error("error in setter with seconds");
     }
     sec = _sec;
     
@@ -96,7 +103,7 @@ inline void DayTime::setMinute(unsigned int _minute)
 {
     if(_minute >= 60)
     {
-        throw std::runtime_error("you stupid fatfuck with minutes");
+        throw std::runtime_error("error in setter with minutes");
     }
     minute = _minute;
 }
@@ -110,7 +117,7 @@ inline void DayTime::setHour(unsigned int _hour)
 {
     if(_hour >= 24)
     {
-        throw std::runtime_error("you stupid fatfuck with hours");
+        throw std::runtime_error("error in setter with hours");
     }
     hour = _hour;
 }
@@ -123,15 +130,15 @@ inline int DayTime::getHour() const
 inline void DayTime::setDay(unsigned int _day)
 {
 
-    // const int monthIds[] = {
-    //     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    const int monthIds[] = {
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
-    // const int monthDays[] = {
-    //     31, 28, 31, 30, 31, 30,
-    //     31, 31, 30, 31, 30, 31};
-    if (_day > static_cast<unsigned int>(getDayCount(month-1)))
+    const int monthDays[] = {
+        31, 28, 31, 30, 31, 30,
+        31, 31, 30, 31, 30, 31};
+    if (_day > monthDays[month-1])
     {
-        throw std::runtime_error("you stupid fatfuck with days");
+        throw std::runtime_error("error in setter with days");
     }
     day = _day;
 }
@@ -141,16 +148,16 @@ inline int DayTime::getDay() const
     return day;
 }
 
-inline void DayTime::setMounth(unsigned int _mounth)
+inline void DayTime::setMonth(unsigned int _mounth)
 {
     if(_mounth > 12  || _mounth == 0)
     {
-        throw std::runtime_error("you stupid fatfuck with mounths");
+        throw std::runtime_error("error in setter with months");
     }
     month = _mounth;
 }
 
-inline int DayTime::getMounth() const
+inline int DayTime::getMonth() const
 {
     return month;
 }
@@ -159,7 +166,7 @@ inline void DayTime::setYear(int _year)
 {
     if(_year == 0)
     {
-        throw std::runtime_error("you stupid fatfuck with years");
+        throw std::runtime_error("error in setter with years");
     }
     year = _year;
 }

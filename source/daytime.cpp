@@ -1,10 +1,11 @@
 #include <daytime.hpp>
 // ---------------------- Constructors --------------------
-DayTime::DayTime(DayTime& dt) : DayTime::DayTime(dt.sec, dt.minute, dt.hour, dt.day, dt.month, dt.year){
-    
+DayTime::DayTime(DayTime &dt) : DayTime::DayTime(dt.sec, dt.minute, dt.hour, dt.day, dt.month, dt.year)
+{
 }
-DayTime::DayTime(int _seconds, int _minutes, int _hours, int _days, int _month, int _years) : sec{_seconds},\
- minute{_minutes}, hour{_hours}, day{_days}, month{_month}, year{_years} {
+DayTime::DayTime(int _seconds, int _minutes, int _hours, int _days, int _month, int _years) : sec{_seconds},
+                                                                                              minute{_minutes}, hour{_hours}, day{_days}, month{_month}, year{_years}
+{
 
     if (!checker(sec, minute, hour, day, month, year))
     {
@@ -18,8 +19,8 @@ DayTime::DayTime(TimeStruct ts, DateStruct ds) : sec(ts.sec), minute(ts.minute),
         throw std::runtime_error("error with contructor");
     }
 }
-DayTime::DayTime(DayTime &&moved) : DayTime::DayTime(moved.sec, moved.minute, moved.hour, moved.day, moved.month, moved.year){
-
+DayTime::DayTime(DayTime &&moved) : DayTime::DayTime(moved.sec, moved.minute, moved.hour, moved.day, moved.month, moved.year)
+{
 }
 //----------------------------------------------------------
 bool DayTime::checker(unsigned int sec, unsigned int minute, unsigned int hour, unsigned int day, unsigned int month, unsigned int year)
@@ -46,7 +47,7 @@ bool DayTime::checker(unsigned int sec, unsigned int minute, unsigned int hour, 
         throw std::runtime_error("Checker error - hours");
         return false;
     }
-    else if (day > static_cast<unsigned int>(getDayCount(month-1)))
+    else if (day > static_cast<unsigned int>(getDayCount(month)))
     {
         throw std::runtime_error("Checker error - days");
         return false;
@@ -67,7 +68,8 @@ bool DayTime::checker(unsigned int sec, unsigned int minute, unsigned int hour, 
     }
 }
 
-DayTime DayTime::fromString(const std::string& input, const std::string& format) {
+DayTime DayTime::fromString(const std::string &input, const std::string &format)
+{
     static const std::map<char, std::pair<int, int>> formatSpecifiers = {
         {'Y', {0, 4}}, // 4 digits
         {'y', {1, 2}}, // 2 digits
@@ -82,93 +84,133 @@ DayTime DayTime::fromString(const std::string& input, const std::string& format)
     size_t inputPos = 0;
     size_t formatPos = 0;
 
-    while (formatPos < format.size() && inputPos < input.size()) {
-        if (format[formatPos] == '%') {
-            if (formatPos + 1 < format.size()) {
+    while (formatPos < format.size() && inputPos < input.size())
+    {
+        if (format[formatPos] == '%')
+        {
+            if (formatPos + 1 < format.size())
+            {
                 char specifier = format[formatPos + 1];
-                if (formatSpecifiers.count(specifier)) {
-                    const auto& spec = formatSpecifiers.at(specifier);
+                if (formatSpecifiers.count(specifier))
+                {
+                    const auto &spec = formatSpecifiers.at(specifier);
                     int value = 0;
                     int digitsRead = 0;
-                    
-                    while (digitsRead < spec.second && inputPos < input.size() && isdigit(input[inputPos])) {
+
+                    while (digitsRead < spec.second && inputPos < input.size() && isdigit(input[inputPos]))
+                    {
                         value = value * 10 + (input[inputPos] - '0');
                         inputPos++;
                         digitsRead++;
                     }
-                    
-                    if (digitsRead != spec.second) {
+
+                    if (digitsRead != spec.second)
+                    {
                         throw std::runtime_error("Insufficient digits for format specifier");
                     }
-                    
+
                     components[spec.first] = value;
                     formatPos += 2;
                     continue;
                 }
             }
         }
-        
-        if (input[inputPos] != format[formatPos]) {
+
+        if (input[inputPos] != format[formatPos])
+        {
             throw std::runtime_error("Format delimiter mismatch");
         }
         inputPos++;
         formatPos++;
     }
 
+    int year = components[0] != 0 ? components[0] : (components[1] >= 70 ? components[1] + 1900 : components[1] + 2000);
 
-    int year = components[0] != 0 ? components[0] : 
-              (components[1] >= 70 ? components[1] + 1900 : components[1] + 2000);
-    
     int month = components[2];
     int day = components[3];
     int hour = components[4];
     int minute = components[5];
     int second = components[6];
 
-    if (month > 12) throw std::runtime_error("Invalid month");
-    if (day > 31) throw std::runtime_error("Invalid day");
-    if (hour > 23) throw std::runtime_error("Invalid hour");
-    if (minute > 59) throw std::runtime_error("Invalid minute");
-    if (second > 59) throw std::runtime_error("Invalid second");
-
+    if (month > 12)
+        throw std::runtime_error("Invalid month");
+    if (day > 31)
+        throw std::runtime_error("Invalid day");
+    if (hour > 23)
+        throw std::runtime_error("Invalid hour");
+    if (minute > 59)
+        throw std::runtime_error("Invalid minute");
+    if (second > 59)
+        throw std::runtime_error("Invalid second");
 
     int maxDays = getDayCount(month);
-    if (month == 2 && ((year % 400 == 0) || (year % 100 != 0 && year % 4 == 0))) {
+    if (month == 2 && ((year % 400 == 0) || (year % 100 != 0 && year % 4 == 0)))
+    {
         maxDays = 29;
     }
-    if (day > maxDays) {
+    if (day > maxDays)
+    {
         throw std::runtime_error("Invalid day for month");
     }
 
     return DayTime(second, minute, hour, day, month, year);
 }
 
-
 void DayTime::printDayTime()
 {
     printf("|---------------------------|\n");
     printf("current time: %02d/%02d/%02d\n", getSec(), getMinute(), getHour());
-    printf("current date: %02d/%02d/%04d\n", getDay(), getMounth(), getYear());
+    printf("current date: %02d/%02d/%04d\n", getDay(), getMonth(), getYear());
     printf("|---------------------------|\n");
 }
 
-int DayTime::getDayCount(int month){
-    switch (month) {
-        case 1: return 31;
-        case 2: return 28;
-        case 3: return 31;
-        case 4: return 30;
-        case 5: return 31;
-        case 6: return 30;
-        case 7: return 31;
-        case 8: return 31;
-        case 9: return 30;
-        case 10: return 31;
-        case 11: return 30;
-        case 12: return 31;
-        default:
-            throw std::runtime_error("Error in getDayCount! Month out of range. Excepted 1 <= n <= 12, got n = " + std::to_string(month) + " instead.");
+int DayTime::getDayCount(int month)
+{
+    switch (month)
+    {
+    case 1:
+        return 31;
+    case 2:
+        return 28;
+    case 3:
+        return 31;
+    case 4:
+        return 30;
+    case 5:
+        return 31;
+    case 6:
+        return 30;
+    case 7:
+        return 31;
+    case 8:
+        return 31;
+    case 9:
+        return 30;
+    case 10:
+        return 31;
+    case 11:
+        return 30;
+    case 12:
+        return 31;
+    default:
+        throw std::runtime_error("Error in getDayCount! Month out of range. Excepted 1 <= n <= 12, got n = " + std::to_string(month) + " instead.");
     }
+}
+
+long long DayTime::getTimeStamp()
+{
+    long long result = 0;
+    result += (365 * 24 * 60 * 60) * static_cast<long long>(year);
+    for (int i = 1; i < month; i++)
+    {
+        result += static_cast<long long>(getDayCount(i)) * (24 * 60 * 60);
+    }
+    result += (24 * 60 * 60) * static_cast<long long>(day - 1);
+    result += (60 * 60) * static_cast<long long>(hour);
+    result += 60 * static_cast<long long>(minute);
+    result += static_cast<long long>(sec);
+
+    return result;
 }
 
 int DayTime::DaysTo(int day, int month, int year, int cDay, int cMonth, int cYear)
@@ -223,8 +265,8 @@ void DayTime::addSec(const int _sec)
     //     sec = ((60 * (abs(sec) / 60 + 1)) + sec) % 60;
     // }
     // else {
-        this->addMinute(sec / 60);
-        sec = sec % 60;
+    this->addMinute(sec / 60);
+    sec = sec % 60;
     // }
 }
 
@@ -236,8 +278,8 @@ void DayTime::addMinute(const int _minute)
     //     minute = ((60 * (abs(minute) / 60 + 1)) + minute) % 60;
     // }
     // else {
-        this->addHour(minute / 60);
-        minute = minute % 60;
+    this->addHour(minute / 60);
+    minute = minute % 60;
     // }
 }
 
@@ -249,8 +291,8 @@ void DayTime::addHour(const int _hour)
     //     hour = ((24 * (abs(hour) / 24 + 1)) + hour) % 24;
     // }
     // else {
-        this->addDay(hour / 24);
-        hour = hour % 24;
+    this->addDay(hour / 24);
+    hour = hour % 24;
     // }
 }
 
@@ -263,13 +305,14 @@ void DayTime::addDay(const int _day)
     //         this->addMonth(-1);
     //         day += getDayCount(month);
     //     }
-        
+
     // }
     // else {
-        while (day > getDayCount(month) - 1) {
-            day -= getDayCount(month);
-            this->addMonth(1);
-        }
+    while (day > static_cast<unsigned int>(getDayCount(month) - 1))
+    {
+        day -= static_cast<unsigned int>(getDayCount(month));
+        this->addMonth(1);
+    }
     // }
     day++;
 }
@@ -286,17 +329,18 @@ void DayTime::addMonth(const int _month)
     //             month = 12 + month;
     //         }
     //         else {
-                // year -= abs(month) / 12;
-                // month = (12 * (abs(month) / 12)) + month;
-        //     }
+    // year -= abs(month) / 12;
+    // month = (12 * (abs(month) / 12)) + month;
+    //     }
 
-        // }
+    // }
     // }
     // else {
-        year += month / 12;
-        month = month % 12;
+    year += month / 12;
+    month = month % 12;
     // }
-    if (day + 1 > getDayCount(month + 1)) {
+    if (day + 1 > static_cast<unsigned int>(getDayCount(month + 1)))
+    {
         // if (month < 0) {
         //     day = getDayCount(month + 1);
         // }
@@ -306,7 +350,7 @@ void DayTime::addMonth(const int _month)
 
 void DayTime::addYear(const int _year)
 {
-    year+=_year;
+    year += _year;
 }
 
 DayTime &DayTime::operator=(const DayTime &dt)

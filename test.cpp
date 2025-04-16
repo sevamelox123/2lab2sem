@@ -1,110 +1,88 @@
-#include <iostream>
-#include <string>
-#include <ctime>
-#include <map>
-#include <iomanip>
-#include <sstream>
-#include <vector>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include "daytime.hpp"
+#include "include/netimpl.hpp"
 
-class DateTimeParser {
-private:
-    static const std::map<char, std::pair<int, int>> formatSpecifiers;
+TEST(ConstructorTests, Copy) {
+    DayTime dt1(1,1,1,1,1,1);
+    DayTime dt2(dt1);
+    ASSERT_EQ(dt1.getTimeStamp(), dt2.getTimeStamp());
+    // std::cout<< dt1.getTimeStamp() << '-' << dt2.getTimeStamp() << std::endl;
+  }
+TEST(ConstructorTests,Move){
+    DayTime dt1(1,1,1,1,1,1);
+    DayTime dt2(std::move(dt1));
 
-    static std::vector<int> extractComponents(const std::string& input, const std::string& format) {
-        std::vector<int> components(7, 0); // Y,y,m,d,H,M,S
-        size_t inputPos = 0;
-        size_t formatPos = 0;
+    ASSERT_EQ(dt1.getTimeStamp(), dt2.getTimeStamp());
+}
+TEST(ConstructorTests, CopyConstructor) {
+    DayTime dt1(1,1,1,1,1,1);
+    DayTime dt2 = dt1;
 
-        while (formatPos < format.size() && inputPos < input.size()) {
-            if (format[formatPos] == '%') {
-                if (formatPos + 1 < format.size()) {
-                    char specifier = format[formatPos + 1];
-                    if (formatSpecifiers.count(specifier)) {
-                        const auto& spec = formatSpecifiers.at(specifier);
-                        int value = 0;
-                        int digitsRead = 0;
-                        
-                        while (digitsRead < spec.second && inputPos < input.size() && isdigit(input[inputPos])) {
-                            value = value * 10 + (input[inputPos] - '0');
-                            inputPos++;
-                            digitsRead++;
-                        }
-                        
-                        if (digitsRead != spec.second) {
-                            throw std::runtime_error("Insufficient digits for format specifier");
-                        }
-                        
-                        components[spec.first] = value;
-                        formatPos += 2;
-                        continue;
-                    }
-                }
-            }
-            
-            if (input[inputPos] != format[formatPos]) {
-                throw std::runtime_error("Format delimiter mismatch");
-            }
-            inputPos++;
-            formatPos++;
-        }
+    ASSERT_EQ(dt1.getTimeStamp(), dt2.getTimeStamp());
+}
 
-        return components;
-    }
+TEST(ConstructorTests, MoveConstructor) {
+    DayTime dt1(1,1,1,1,1,1);
+    DayTime dt2 = dt1;
 
-public:
-    static std::tm parse(const std::string& input, const std::string& format) {
-        auto components = extractComponents(input, format);
-        std::tm result = {0};
+    ASSERT_EQ(dt1.getTimeStamp(), dt2.getTimeStamp());
+}
 
-        // Заполняем структуру tm
-        if (components[0] != 0) { // 4-digit year
-            result.tm_year = components[0] - 1900;
-        } else if (components[1] != 0) { // 2-digit year
-            result.tm_year = (components[1] >= 70 ? components[1] : components[1] + 100) - 1900;
-        }
+TEST(ConstructorTests, StructConstructor) {
+    TimeStruct Time{1,2,3};
+    DateStruct Date{4,5,6};
+    DayTime dt(Time,Date);
 
-        result.tm_mon = components[2] - 1;
-        result.tm_mday = components[3];
-        result.tm_hour = components[4];
-        result.tm_min = components[5];
-        result.tm_sec = components[6];
-        result.tm_isdst = -1;
+    ASSERT_EQ(Time.toString(), dt.time().toString());
+    ASSERT_EQ(Date.toString(), dt.date().toString());
+}
+TEST(ConstructorTests, IntConstructor) {
+    TimeStruct time{1,2,3};
+    DateStruct date{4,5,6};
+    DayTime dt(time.sec, time.minute, time.hour, date.day, date.month, date.year);
 
-        // Validate date/time
-        if (mktime(&result) == -1) {
-            throw std::runtime_error("Invalid date/time values");
-        }
+    ASSERT_EQ(time.toString(), dt.time().toString());
+    ASSERT_EQ(date.toString(), dt.date().toString());
+}
+TEST(GetterSetterTests, GettersSetters) {
+    DayTime dt;
 
-        return result;
-    }
-};
+    dt.setSec(5);
+    ASSERT_EQ(dt.getSec(), 5);
+    dt.setMinute(5);
+    ASSERT_EQ(dt.getMinute(), 5);
+    dt.setHour(5);
+    ASSERT_EQ(dt.getHour(), 5);
+    dt.setDay(5);
+    ASSERT_EQ(dt.getDay(), 5);
+    dt.setMonth(5);
+    ASSERT_EQ(dt.getMonth(), 5);
+    dt.setYear(5);
+    ASSERT_EQ(dt.getYear(), 5);
+    ASSERT_EQ(dt.time().toString(), (TimeStruct{5,5,5}).toString());
+    ASSERT_EQ(dt.date().toString(), (DateStruct{5,5,5}).toString());
+}
 
-// Инициализация статической map
-const std::map<char, std::pair<int, int>> DateTimeParser::formatSpecifiers = {
-    {'Y', {0, 4}}, {'y', {1, 2}}, {'m', {2, 2}},
-    {'d', {3, 2}}, {'H', {4, 2}}, {'M', {5, 2}},
-    {'S', {6, 2}}
-};
+TEST(GetterSetterTests, GettersSettersInvalidInput) {
+    DayTime dt;
+    dt.setMonth(1);
 
-int main() {
-    try {
-        // Пример использования
-        std::tm time1 = DateTimeParser::parse("2023-12-31 23:59:59", "%Y-%m-%d %H:%M:%S");
-        std::tm time2 = DateTimeParser::parse("31.12.23", "%d.%m.%y");
-        
-        auto printTime = [](const std::tm& tm) {
-            std::cout << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << std::endl;
-        };
+    ASSERT_ANY_THROW(dt.setSec(60));
+    ASSERT_ANY_THROW(dt.setSec(-42));
+    ASSERT_ANY_THROW(dt.setMinute(60));
+    ASSERT_ANY_THROW(dt.setMinute(-42));
+    ASSERT_ANY_THROW(dt.setHour(24));
+    ASSERT_ANY_THROW(dt.setDay(32));
+    ASSERT_ANY_THROW(dt.setDay(0));
+    ASSERT_ANY_THROW(dt.setMonth(13));
+    ASSERT_ANY_THROW(dt.setMonth(0));
 
-        std::cout << "Parsed time 1: ";
-        printTime(time1);
-        
-        std::cout << "Parsed time 2: ";
-        printTime(time2);
-
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-    }
-
-    return 0;
+}
+int main(int argc, char **argv)
+{
+  ::testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleMock(&argc, argv);
+  
+  return RUN_ALL_TESTS();
 }
